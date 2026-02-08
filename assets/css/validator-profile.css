@@ -1,0 +1,132 @@
+/* =====================================================
+   SECTION PANEL BACKGROUNDS
+===================================================== */
+
+
+.ps-validator-profile__section {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+}
+.ps-validator-profile__grid {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+}
+
+.ps-validator-profile__label,
+.ps-validator-profile__value {
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Slightly darker alternating sections */
+
+.ps-validator-profile__section:nth-of-type(even) {
+    background: rgba(0,0,0,0.035);
+}
+
+/* Section header divider */
+
+.ps-validator-profile__section h3 {
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+    border-bottom: 2px solid var(--DIVIDER);
+}
+/* =====================================================
+   FULL WIDTH ROW SEPARATORS
+===================================================== */
+
+.ps-validator-profile__grid {
+    row-gap: 0;
+}
+
+.ps-validator-profile__grid > * {
+    border-bottom: 1px solid var(--DIVIDER--LIGHT);
+}
+
+/* Remove last row line */
+
+.ps-validator-profile__grid > *:nth-last-child(-n+2) {
+    border-bottom: none;
+}
+
+/* Remove old borders */
+
+.ps-validator-profile__label,
+.ps-validator-profile__value {
+    border-bottom: none;
+}
+/* =====================================================
+   ROW STRIPING
+===================================================== */
+
+.ps-validator-profile__grid > :nth-child(4n+1),
+.ps-validator-profile__grid > :nth-child(4n+2) {
+    --tab-bg: rgba(127, 127, 127, 0.08);
+    --tab-bg-hover: rgba(127, 127, 127, 0.12);
+    --tab-bg-active: rgba(127, 127, 127, 0.18);
+
+}
+.ps-validator-profile__grid > :nth-last-child(-n+2) {
+    border-bottom: none;
+}
+
+
+/* =====================================================
+   INLINE VALUE PILL
+===================================================== */
+
+.bcc-inline-value,
+.bcc-inline-select {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.04);
+}
+
+.bcc-inline-value:hover,
+.bcc-inline-select:hover {
+    background: rgba(0,0,0,0.08);
+}
+.bcc-inline-edit {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bcc-inline-edit:hover {
+    background: var(--PS-COLOR--PRIMARY);
+    color: #fff;
+}
+/* =====================================================
+   CHAINS PANEL MATCHING SECTIONS
+===================================================== */
+
+.ps-chain-entry {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--DIVIDER--LIGHT);
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+/* Alternating chains */
+
+.ps-chain-entry:nth-child(even) {
+    background: rgba(0,0,0,0.02);
+}
+@media (max-width: 640px) {
+
+    .ps-validator-profile__section {
+        padding: 16px;
+    }
+
+    .ps-validator-profile__grid > * {
+        background: transparent !important;
+    }
+
+}
