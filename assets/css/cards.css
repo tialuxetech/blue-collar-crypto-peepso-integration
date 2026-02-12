@@ -25,3 +25,41 @@
     line-height: 1.4 !important;
     padding: 8px 12px !important;
 }
+.bcc-slider-wrap {
+  margin-top: 30px;
+}
+
+.bcc-slider {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+}
+
+.bcc-slide {
+  min-width: 260px;
+  background: var(--PS-COLOR--APP);
+  border-radius: 10px;
+  padding: 16px;
+  scroll-snap-align: start;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+
+.bcc-slide h4 {
+  margin-bottom: 10px;
+}
+
+.bcc-slide-stats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bcc-slide-stats li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+.bcc-slide-stats li:last-child {
+  border-bottom: none;
+}

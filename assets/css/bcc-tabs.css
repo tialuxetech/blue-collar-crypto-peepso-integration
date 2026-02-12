@@ -1,0 +1,243 @@
+/* ======================================================
+   REPEATER CONTAINER
+====================================================== */
+
+.bcc-slider-wrap {
+    border: 1px solid var(--DIVIDER--LIGHT);
+    padding: 16px;
+    border-radius: 6px;
+}
+
+/* Grid Layout (side-by-side cards) */
+.bcc-slider {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+/* ======================================================
+   CARD (REPEATER ROW)
+====================================================== */
+
+.bcc-slide {
+    position: relative;
+    background: var(--PS-COLOR--APP, #ffffff);
+    color: var(--PS-COLOR--TEXT, #222);
+    border: 1px solid var(--PS-COLOR--DIVIDER, #ddd);
+    border-radius: 6px;
+    padding: 14px;
+    cursor: default;
+    transition: background .15s ease;
+}
+
+.bcc-slide:hover {
+    background: rgba(0,0,0,0.02);
+}
+
+/* Dark mode */
+body.ps-theme-dark .bcc-slide {
+    background: #1f1f1f;
+    color: #e6e6e6;
+    border-color: #333;
+}
+
+/* ======================================================
+   DRAG HANDLE
+====================================================== */
+
+.bcc-drag-handle {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    cursor: grab;
+    font-size: 18px;
+    color: #777;
+}
+
+.bcc-drag-handle:hover {
+    color: #000;
+}
+
+body.ps-theme-dark .bcc-drag-handle:hover {
+    color: #fff;
+}
+
+/* ======================================================
+   DELETE BUTTON
+====================================================== */
+
+.bcc-delete-repeater {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #999;
+    padding: 4px;
+}
+
+.bcc-delete-repeater:hover {
+    color: #d63638;
+}
+
+body.ps-theme-dark .bcc-delete-repeater {
+    color: #bbb;
+}
+
+body.ps-theme-dark .bcc-delete-repeater:hover {
+    color: #ff6b6b;
+}
+
+/* ======================================================
+   SORTABLE PLACEHOLDER
+====================================================== */
+
+.bcc-sort-placeholder {
+    background: rgba(0,0,0,0.08);
+    border: 2px dashed #999;
+    border-radius: 6px;
+    min-height: 120px;
+}
+
+body.ps-theme-dark .bcc-sort-placeholder {
+    background: rgba(255,255,255,0.08);
+}
+
+/* ======================================================
+   FIELD ROWS
+====================================================== */
+
+.bcc-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--DIVIDER--LIGHT);
+    transition: background .15s ease;
+}
+
+.bcc-row:last-child {
+    border-bottom: none;
+}
+
+.bcc-row-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--PS-COLOR--TEXT--LIGHT);
+}
+
+/* ======================================================
+   VALUE ROW
+====================================================== */
+
+.bcc-row-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    color: var(--PS-COLOR--TEXT);
+}
+
+/* ======================================================
+   INLINE DISPLAY
+====================================================== */
+
+.bcc-inline-text,
+.bcc-inline-select {
+    font-size: 15px;
+    line-height: 1.4;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.bcc-inline-text.is-empty,
+.bcc-inline-select.is-empty {
+    color: var(--PS-COLOR--TEXT--LIGHT);
+    font-style: italic;
+}
+
+/* ======================================================
+   INLINE INPUT
+====================================================== */
+
+.bcc-inline-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 8px 12px;
+    background: #0f1720;
+    color: var(--PS-COLOR--TEXT);
+    border: 2px solid #1fb6ff;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    transition: border .15s ease, box-shadow .15s ease;
+}
+
+.bcc-inline-input:focus {
+    box-shadow: 0 0 0 3px rgba(31,182,255,0.25);
+}
+
+/* ======================================================
+   INLINE ACTIONS
+====================================================== */
+
+.bcc-inline-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.bcc-inline-save,
+.bcc-inline-cancel {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--DIVIDER--LIGHT);
+    cursor: pointer;
+    background: var(--PS-COLOR--APP);
+    color: var(--PS-COLOR--TEXT);
+}
+
+.bcc-inline-save {
+    background: #1fb6ff;
+    border-color: #1fb6ff;
+    color: #000;
+}
+
+.bcc-inline-save:hover {
+    filter: brightness(1.1);
+}
+
+.bcc-inline-cancel:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+/* ======================================================
+   TOAST
+====================================================== */
+
+.bcc-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #2f7d32;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all .3s ease;
+    z-index: 9999;
+}
+
+.bcc-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.bcc-toast-error {
+    background: #b71c1c;
+}

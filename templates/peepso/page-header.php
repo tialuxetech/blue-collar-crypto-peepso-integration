@@ -1,27 +1,35 @@
 <?php
+if (!defined('ABSPATH')) exit;
+
+if (!isset($page) || !is_object($page) || empty($page->id)) {
+    return;
+}
+
+if (!isset($page_segment)) {
+    $page_segment = '';
+}
+
 $PeepSoPageUser = new PeepSoPageUser($page->id);
-#$PeepSoPage = new PeepSoPage($page->id);
-$PeepSoPage = $page;
-$coverUrl = $PeepSoPage->get_cover_url();
-$has_cover = false;
+$PeepSoPage     = $page;
 
-if (FALSE !== stripos($coverUrl, 'peepso/pages/'))
-	$has_cover = true;
+$coverUrl  = $PeepSoPage->get_cover_url();
+$has_cover = FALSE !== stripos($coverUrl, 'peepso/pages/');
 
-if (FALSE === $PeepSoPageUser->can('manage_page') || (FALSE === $has_cover)) {
-	$reposition_style = 'display:none;';
-	$cover_class = 'default';
+if (FALSE === $PeepSoPageUser->can('manage_page') || FALSE === $has_cover) {
+    $reposition_style = 'display:none;';
+    $cover_class     = 'default';
 } else {
-	$reposition_style = '';
-	$cover_class = 'has-cover';
+    $reposition_style = '';
+    $cover_class     = 'has-cover';
 }
 
 $description = str_replace("\n", "<br/>", $page->description);
-$description = html_entity_decode($description);
+$description = wp_kses_post(html_entity_decode($description));
+$page_categories = [];
 
-$page_categories = PeepSoPageCategoriesPages::get_categories_for_page($page->id);
-$page_categories_html = array();
-
+if (class_exists('PeepSoPageCategoriesPages')) {
+    $page_categories = PeepSoPageCategoriesPages::get_categories_for_page($page->id);
+}
 ?>
 <div class="ps-focus ps-focus--page ps-page__profile-focus ps-js-focus ps-js-focus--page ps-js-page-header">
 	<div class="ps-focus__cover ps-js-cover">
