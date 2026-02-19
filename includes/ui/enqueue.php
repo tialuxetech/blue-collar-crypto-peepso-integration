@@ -66,11 +66,20 @@ function bcc_enqueue_assets() {
     // Make sure media library is loaded
     wp_enqueue_media();
 
-    // Gallery script - depends on media-views (correct WordPress handle)
+    // Gallery slider script (load this before gallery)
+    wp_enqueue_script(
+        'bcc-gallery-slider',
+        $base_js . 'bcc-gallery-slider.js',
+        ['jquery'],
+        time(),
+        true
+    );
+
+    // Gallery script - depends on media-views and slider
     wp_enqueue_script(
         'bcc-gallery',
         $base_js . 'bcc-gallery.js',
-        ['jquery', 'bcc-core', 'media-views'], // Fixed: 'wp-media' → 'media-views'
+        ['jquery', 'bcc-core', 'media-views', 'bcc-gallery-slider'],
         time(),
         true
     );
@@ -108,6 +117,7 @@ function bcc_enqueue_assets() {
             console.log("BCC modules loaded:", {
                 core: typeof bccParseOptions !== "undefined",
                 gallery: typeof wp !== "undefined" && wp.media ? "loaded" : "missing",
+                gallerySlider: typeof initGallerySlider !== "undefined",
                 inlineEdit: typeof bccInlineEdit !== "undefined",
                 ajax: typeof bcc_ajax !== "undefined"
             });
