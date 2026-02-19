@@ -63,3 +63,10 @@
 .bcc-slide-stats li:last-child {
   border-bottom: none;
 }
+
+@media (max-width: 768px) {
+    .bcc-slide {
+        flex: 0 0 95%;
+        max-width: 95%;
+    }
+}

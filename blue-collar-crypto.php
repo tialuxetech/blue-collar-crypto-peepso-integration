@@ -7,16 +7,13 @@
  * License: GPL v2 or later
  */
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
 /**
  * ==========================================================
  * Constants
  * ==========================================================
  */
-
 define('BCC_VERSION', '1.0.0');
 define('BCC_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('BCC_INCLUDES_PATH', BCC_PLUGIN_PATH . 'includes/');
@@ -25,68 +22,50 @@ define('BCC_URL', plugin_dir_url(__FILE__));
 
 /**
  * ==========================================================
- * Always-safe includes (no PeepSo dependency)
+ * Bootstrap
  * ==========================================================
  */
+$bootstrap = BCC_INCLUDES_PATH . 'core/bootstrap.php';
 
-require_once BCC_INCLUDES_PATH . 'enqueue.php';
-require_once BCC_INCLUDES_PATH . 'helpers/repeater-renderer.php';
-require_once BCC_INCLUDES_PATH . 'ajax/inline-save.php';
-require_once BCC_INCLUDES_PATH . 'helpers/peepso-page-tabs.php';
-require_once BCC_INCLUDES_PATH . 'helpers/sync-repair.php';
-require_once BCC_INCLUDES_PATH . 'sync/page-to-cpt-sync.php';
-
-
+if (file_exists($bootstrap)) {
+    require_once $bootstrap;
+} else {
+    // fallback: do not fatal the site if file missing
+    add_action('admin_notices', function () use ($bootstrap) {
+        echo '<div class="notice notice-error"><p>';
+        echo esc_html('BCC Bootstrap missing: ' . $bootstrap);
+        echo '</p></div>';
+    });
+    return;
+}
 
 /**
  * ==========================================================
- * Plugin Init (after plugins loaded)
+ * Initialize Plugin
  * ==========================================================
  */
-
-add_action('plugins_loaded', 'bcc_init');
+add_action('plugins_loaded', 'bcc_init', 20);
 
 function bcc_init() {
-
-    // ---------------------------------------------
-    // Verify PeepSo
-    // ---------------------------------------------
 
     if (!class_exists('PeepSo')) {
 
         add_action('admin_notices', function () {
             echo '<div class="notice notice-warning"><p>';
-            esc_html_e(
-                'Blue Collar Crypto – PeepSo Integration requires PeepSo to be installed and activated.',
-                'blue-collar-crypto'
-            );
+            echo esc_html__('Blue Collar Crypto – PeepSo Integration requires PeepSo to be installed and activated.', 'blue-collar-crypto');
             echo '</p></div>';
         });
 
         return;
     }
 
-    // ---------------------------------------------
     // Register Dashboard Tab
-    // ---------------------------------------------
-
     add_filter('peepso_page_segment_menu_links', 'bcc_register_dashboard_tab');
 
-    // ---------------------------------------------
     // Register Dashboard Renderer
-    // ---------------------------------------------
+    add_action('peepso_page_segment_dashboard', 'bcc_render_dashboard_segment', 10, 2);
 
-    add_action(
-        'peepso_page_segment_dashboard',
-        'bcc_render_dashboard_segment',
-        10,
-        2
-    );
-
-    // ---------------------------------------------
     // Translations
-    // ---------------------------------------------
-
     load_plugin_textdomain(
         'blue-collar-crypto',
         false,
@@ -96,14 +75,12 @@ function bcc_init() {
 
 /**
  * ==========================================================
- * Add Dashboard Tab
+ * Dashboard Tab Registration
  * ==========================================================
  */
-
 function bcc_register_dashboard_tab($segments) {
 
     if (isset($segments[0])) {
-
         $segments[0][] = [
             'href'  => 'dashboard',
             'title' => __('Dashboard', 'blue-collar-crypto'),
@@ -116,10 +93,9 @@ function bcc_register_dashboard_tab($segments) {
 
 /**
  * ==========================================================
- * Render Dashboard Segment
+ * Dashboard Renderer
  * ==========================================================
  */
-
 function bcc_render_dashboard_segment($page_data = null, $url_segments = null) {
 
     $template = BCC_TEMPLATES_PATH . 'peepso/dashboard.php';
@@ -131,3 +107,4 @@ function bcc_render_dashboard_segment($page_data = null, $url_segments = null) {
 
     include $template;
 }
+

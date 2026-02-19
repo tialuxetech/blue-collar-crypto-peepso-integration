@@ -181,6 +181,7 @@ if (!isset($tabs[$active_tab])) {
 
 <?php
 
+
 $tab_files = [
     'overview'   => __DIR__ . '/dashboard/overview.php',
     'validators' => __DIR__ . '/dashboard/validator.php',
@@ -191,29 +192,34 @@ $tab_files = [
 
 if (isset($tab_files[$active_tab]) && file_exists($tab_files[$active_tab])) {
 
+    /* -----------------------------------------
+     * Resolve Domain Object ID - USE EXISTING FUNCTIONS
+     * ----------------------------------------- */
+
+    switch ($active_tab) {
+
+        case 'nft':
+            $nft_id = function_exists('bcc_get_nft_id') ? bcc_get_nft_id($page->id) : 0;
+            break;
+
+        case 'validators':
+            $validator_id = function_exists('bcc_get_validator_id') ? bcc_get_validator_id($page->id) : 0;
+            break;
+
+        case 'builder':
+            $builder_id = function_exists('bcc_get_builder_id') ? bcc_get_builder_id($page->id) : 0;
+            break;
+
+        case 'dao':
+            $dao_id = function_exists('bcc_get_dao_id') ? bcc_get_dao_id($page->id) : 0;
+            break;
+    }
+
     include $tab_files[$active_tab];
 
 } else {
-
-    if ($active_tab === 'overview') : ?>
-
-        <div class="bcc-overview-message">
-            <h3>Create Your First Project</h3>
-            <p>Select a category above to begin.</p>
-        </div>
-
-    <?php else : ?>
-
-        <div class="bcc-coming-soon">
-            <p>
-                <strong><?php echo esc_html($tabs[$active_tab]); ?></strong> coming soon.<br>
-                Create file: <code>dashboard/<?php echo esc_html($active_tab); ?>.php</code>
-            </p>
-        </div>
-
-    <?php endif;
+    // ... rest of your code
 }
 
 ?>
-
 </div>
