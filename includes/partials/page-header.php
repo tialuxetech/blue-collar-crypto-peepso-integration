@@ -1,9 +1,11 @@
 <?php
 $PeepSoPageUser = new PeepSoPageUser($page->id);
-#$PeepSoPage = new PeepSoPage($page->id);
+$PeepSoPage = new PeepSoPage($page->id);
 $PeepSoPage = $page;
 $coverUrl = $PeepSoPage->get_cover_url();
 $has_cover = false;
+
+
 
 if (FALSE !== stripos($coverUrl, 'peepso/pages/'))
 	$has_cover = true;
