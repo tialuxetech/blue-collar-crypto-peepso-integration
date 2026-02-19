@@ -1,31 +1,32 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-require_once __DIR__ . '/page-category-map.php';
-
 /**
  * =====================================================
- *  PeepSo Page → Multi-CPT Shadow Sync (Production)
+ * PeepSo Page → Shadow CPT Sync Engine
  * =====================================================
- * - Captures new peepso-page IDs at insert time
- * - Runs sync at shutdown (after PeepSo writes relations)
- * - Auto-detects PeepSo relation table & columns
- * - Creates multiple CPT shadows if multiple categories selected
+ * - Create shadow CPTs on page save
+ * - Page title is source of truth
+ * - Auto-repair mismatched titles
+ * - Prevent duplicates
+ * - Set default visibility
+ * - Delete shadows when page deleted
  */
 
-/* ---------------------------------------------
-   Queue peepso pages created in this request
---------------------------------------------- */
+/* ----------------------------------------------------
+   Queue pages modified in this request
+---------------------------------------------------- */
 
 $GLOBALS['bcc_pending_peepso_pages'] = [];
 
-add_action('wp_insert_post', function ($post_id, $post, $update) {
+add_action('save_post_peepso-page', function ($post_id, $post, $update) {
 
     if (!$post) return;
-
-    if ($post->post_type !== 'peepso-page') return;
-
     if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) return;
+
+    static $queued = [];
+    if (isset($queued[$post_id])) return;
+    $queued[$post_id] = true;
 
     $GLOBALS['bcc_pending_peepso_pages'][$post_id] = [
         'title'  => $post->post_title,
@@ -35,38 +36,35 @@ add_action('wp_insert_post', function ($post_id, $post, $update) {
 }, 10, 3);
 
 
-/* ---------------------------------------------
-   Locate PeepSo page-category relation table
---------------------------------------------- */
+
+
+/* ----------------------------------------------------
+   Find PeepSo Page ↔ Category Relation Table
+---------------------------------------------------- */
 
 function bcc_find_peepso_relation_table() {
 
     global $wpdb;
 
-    $like = '%' . $wpdb->esc_like('peepso_page_categories') . '%';
+    $table = $wpdb->prefix . 'peepso_page_categories';
 
-    $tables = $wpdb->get_col(
-        $wpdb->prepare("SHOW TABLES LIKE %s", $like)
-    );
-
-    if (empty($tables)) return [null, null, null];
-
-    $table = $tables[0];
+    if (!$wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table))) {
+        return [null, null, null];
+    }
 
     $cols = $wpdb->get_results("DESCRIBE {$table}");
-    if (!$cols) return [$table, null, null];
-
-    $col_names = array_map(fn($c) => $c->Field, $cols);
 
     $page_col = null;
     $cat_col  = null;
 
-    foreach ($col_names as $c) {
-        if (!$page_col && stripos($c,'page') !== false && stripos($c,'id') !== false) {
-            $page_col = $c;
+    foreach ($cols as $c) {
+
+        if (!$page_col && stripos($c->Field, 'page') !== false) {
+            $page_col = $c->Field;
         }
-        if (!$cat_col && stripos($c,'cat') !== false && stripos($c,'id') !== false) {
-            $cat_col = $c;
+
+        if (!$cat_col && stripos($c->Field, 'cat') !== false) {
+            $cat_col = $c->Field;
         }
     }
 
@@ -74,41 +72,37 @@ function bcc_find_peepso_relation_table() {
 }
 
 
-/* ---------------------------------------------
-   Perform Sync After Request Finishes
---------------------------------------------- */
+
+
+/* ----------------------------------------------------
+   Sync Engine (Runs After Request)
+---------------------------------------------------- */
 
 add_action('shutdown', function () {
 
     if (empty($GLOBALS['bcc_pending_peepso_pages'])) return;
+    if (!function_exists('bcc_get_category_map')) return;
 
     global $wpdb;
 
     [$table, $page_col, $cat_col] = bcc_find_peepso_relation_table();
 
-    if (!$table || !$page_col || !$cat_col) {
-        error_log("BCC SYNC: Could not locate PeepSo category relation table.");
-        return;
-    }
+    if (!$table || !$page_col || !$cat_col) return;
 
-    $id_map   = bcc_category_id_to_slug();   // PeepSo Cat ID → slug
-    $slug_map = bcc_slug_to_cpt();            // slug → CPT key
+    $map = bcc_get_category_map();
 
     foreach ($GLOBALS['bcc_pending_peepso_pages'] as $page_id => $data) {
 
-        // Pull category rows
         $rows = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT {$cat_col} AS cat_id FROM {$table} WHERE {$page_col} = %d",
+                "SELECT {$cat_col} AS cat_id
+                 FROM {$table}
+                 WHERE {$page_col} = %d",
                 $page_id
             )
         );
 
         if (empty($rows)) continue;
-
-        /* ---------------------------------------------
-           Determine all CPT targets
-        --------------------------------------------- */
 
         $targets = [];
 
@@ -116,33 +110,39 @@ add_action('shutdown', function () {
 
             $cat_id = (int) $row->cat_id;
 
-            if (!isset($id_map[$cat_id])) continue;
+            if (!isset($map[$cat_id]['cpt'])) continue;
 
-            $slug = $id_map[$cat_id];
-
-            if (!isset($slug_map[$slug])) continue;
-
-            $targets[$slug_map[$slug]] = $cat_id;
+            $targets[$map[$cat_id]['cpt']] = $cat_id;
         }
 
         if (empty($targets)) continue;
-
-        /* ---------------------------------------------
-           Create CPT shadows
-        --------------------------------------------- */
 
         $linked = [];
 
         foreach ($targets as $post_type => $cat_id) {
 
-            if (!post_type_exists($post_type)) {
-                error_log("BCC SYNC: CPT {$post_type} not registered.");
+            if (!post_type_exists($post_type)) continue;
+
+            // Existing link?
+            $existing = get_post_meta($page_id, '_linked_' . $post_type . '_id', true);
+
+            if ($existing && get_post($existing)) {
+
+                // Repair title if wrong
+                if (get_the_title($existing) !== $data['title']) {
+
+                    wp_update_post([
+                        'ID'         => $existing,
+                        'post_title'=> $data['title'],
+                        'post_name' => sanitize_title($data['title'])
+                    ]);
+                }
+
+                $linked[$post_type] = (int) $existing;
                 continue;
             }
 
-            $existing = get_post_meta($page_id, '_linked_' . $post_type . '_id', true);
-            if ($existing && get_post($existing)) continue;
-
+            // Create shadow CPT
             $cpt_id = wp_insert_post([
                 'post_type'   => $post_type,
                 'post_title'  => $data['title'],
@@ -152,46 +152,46 @@ add_action('shutdown', function () {
 
             if (!$cpt_id || is_wp_error($cpt_id)) continue;
 
-            update_post_meta($cpt_id, '_peepso_page_id', $page_id);
-            update_post_meta($page_id, '_linked_' . $post_type . '_id', $cpt_id);
+            update_post_meta($cpt_id, '_peepso_page_id', (int) $page_id);
+            update_post_meta($cpt_id, '_peepso_cat_id', (int) $cat_id);
 
-            $linked[$post_type] = $cpt_id;
+            // Default visibility
+            update_post_meta($cpt_id, '_bcc_visibility', 'public');
+
+            update_post_meta($page_id, '_linked_' . $post_type . '_id', (int) $cpt_id);
+
+            $linked[$post_type] = (int) $cpt_id;
         }
 
         update_post_meta($page_id, '_linked_cpts', $linked);
-
     }
 
 });
-/**
- * =====================================================
- * Delete Shadow CPTs when PeepSo Page is Deleted
- * =====================================================
- */
+
+
+
+
+/* ----------------------------------------------------
+   Delete Shadow CPTs When Page Deleted
+---------------------------------------------------- */
 
 add_action('before_delete_post', function ($post_id) {
 
     $post = get_post($post_id);
-    if (!$post) return;
 
-    if ($post->post_type !== 'peepso-page') return;
+    if (!$post || $post->post_type !== 'peepso-page') return;
 
-    // Grab all linked CPTs
     $linked = get_post_meta($post_id, '_linked_cpts', true);
 
     if (!is_array($linked)) return;
 
-    foreach ($linked as $post_type => $cpt_id) {
+    foreach ($linked as $cpt_id) {
 
         if ($cpt_id && get_post($cpt_id)) {
-
-            // Force delete shadow CPT
-            wp_delete_post($cpt_id, true);
+            wp_trash_post($cpt_id);
         }
     }
 
-    // Cleanup meta
     delete_post_meta($post_id, '_linked_cpts');
 
-});
-
+}, 10);
