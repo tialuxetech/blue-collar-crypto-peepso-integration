@@ -54,3 +54,22 @@ function bcc_user_is_owner($post_id) {
     
     return $author_id === $user_id;
 }
+
+/**
+ * ======================================================
+ * PROFILE OWNER CHECK
+ * ======================================================
+ */
+
+if (!function_exists('bcc_user_is_profile_owner')) {
+
+function bcc_user_is_profile_owner($profile_user_id) {
+
+    if (!is_user_logged_in()) {
+        return false;
+    }
+
+    return (int) get_current_user_id() === (int) $profile_user_id;
+}
+
+}
