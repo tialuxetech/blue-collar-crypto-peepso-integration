@@ -58,6 +58,13 @@ require_once BCC_INCLUDES_PATH . 'helpers/data-integrity.php';
 require_once BCC_INCLUDES_PATH . 'helpers/class-bcc-options-helper.php';
 
 /* ======================================================
+   PEEPSO PROFILE INTEGRATION
+====================================================== */
+
+require_once BCC_INCLUDES_PATH . 'peepso/class-bcc-account-security-tab.php';
+\BCC\PeepSo\Account_Security_Tab::init();
+
+/* ======================================================
    UI
 ====================================================== */
 
