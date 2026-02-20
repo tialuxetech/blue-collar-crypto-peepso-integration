@@ -134,9 +134,14 @@ $network_options_str = implode(',', $network_options);
 <?php endif; ?>
 
 </div> <!-- end nft-profile -->
-
-<div id="bcc-visibility-popover" class="bcc-vis-popover" style="display: none;">
-    <div class="bcc-vis-option" data-value="public">🌍 Public</div>
-    <div class="bcc-vis-option" data-value="members">👥 Members</div>
-    <div class="bcc-vis-option" data-value="private">🔒 Private</div>
+<div id="bcc-visibility-popover" style="display:none;">
+  <div class="bcc-vis-option" data-value="public">
+    <span>🌍</span> Public
+  </div>
+  <div class="bcc-vis-option" data-value="members">
+    <span>👥</span> Members
+  </div>
+  <div class="bcc-vis-option" data-value="private">
+    <span>🔒</span> Private
+  </div>
 </div>
