@@ -1,11 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-/* ======================================================
-   NFT CREATOR PROFILE TEMPLATE
-   Uses existing renderer system - ONLY FIELD KEYS CHANGED
-====================================================== */
-
 // Get NFT CPT shadow from PeepSo page
 $nft_id = bcc_get_nft_id($page->id);
 $has_nft = $nft_id > 0;
@@ -45,9 +40,6 @@ $network_options_str = implode(',', $network_options);
 
 <?php else: ?>
 
-    <!-- ======================================================
-        BASIC INFORMATION - Just change field keys here
-    ====================================================== -->
     <section class="bcc-section bcc-section-basic">
         <h3>Basic Information</h3>
         
@@ -63,9 +55,6 @@ $network_options_str = implode(',', $network_options);
         ?>
     </section>
 
-    <!-- ======================================================
-        NFT COLLECTIONS - Uses repeater renderer, just field keys changed
-    ====================================================== -->
     <section class="bcc-section bcc-section-collections">
         <h3>NFT Collections</h3>
         

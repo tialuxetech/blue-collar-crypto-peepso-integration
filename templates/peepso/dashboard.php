@@ -2,6 +2,9 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+if (!isset($page) || !is_object($page) || empty($page->id)) {
+    return;
+}
 
 $user_id = get_current_user_id();
 if (!$user_id) {
@@ -9,104 +12,23 @@ if (!$user_id) {
     return;
 }
 
-global $wpdb;
 
-/* ============================================================
-   FIND CURRENT PEEPSO PAGE
-============================================================ */
-
-$peepso_page_id = null;
-
-/* Try from URL slug */
-$url_parts = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
-
-foreach ($url_parts as $part) {
-
-    if (!$part || $part === 'pages' || $part === 'dashboard') {
-        continue;
-    }
-
-    $part = strtok($part, '?');
-
-    $found = $wpdb->get_var(
-        $wpdb->prepare(
-            "SELECT ID 
-             FROM {$wpdb->posts} 
-             WHERE post_name = %s 
-               AND post_type = 'peepso-page'",
-            $part
-        )
-    );
-
-    if ($found) {
-        $peepso_page_id = intval($found);
-        break;
-    }
-}
-
-/* Fallback from global post */
-if (!$peepso_page_id) {
-    global $post;
-    if ($post && $post->post_type === 'peepso-page') {
-        $peepso_page_id = $post->ID;
-    }
-}
-
-if ($peepso_page_id && class_exists('PeepSoPage')) {
-
-    $page = new PeepSoPage($peepso_page_id);
-
-} else {
-
-    $page = (object)[
-        'id' => 0,
-        'name' => 'Dashboard',
-        'description' => '',
-        'members_count' => 0
-    ];
-}
-
-$page_segment = 'dashboard';
-
-$plugin_header_file =
-    plugin_dir_path(__FILE__) .
-    '../../includes/partials/page-header.php';
+$plugin_header_file = plugin_dir_path(__FILE__) . '../../includes/partials/page-header.php';
 
 if (file_exists($plugin_header_file)) {
-
     include $plugin_header_file;
-
-} else {
-
-    error_log('BCC HEADER NOT FOUND: ' . $plugin_header_file);
-
-    echo '<div class="bcc-dashboard-header">';
-    echo '<h1>' . esc_html($page->name) . '</h1>';
-    echo '<p>Blue Collar Crypto Dashboard</p>';
-    echo '</div>';
 }
 
-/* ============================================================
-   GET PAGE CATEGORIES
-============================================================ */
+global $wpdb;
 
-$category_ids = [];
-
-if ($page->id > 0) {
-
-    $category_ids = $wpdb->get_col(
-        $wpdb->prepare(
-            "SELECT pm_cat_id 
-             FROM {$wpdb->prefix}peepso_page_categories 
-             WHERE pm_page_id = %d",
-            $page->id
-        )
-    );
-}
-
-/* ============================================================
-   TAB DEFINITIONS
-============================================================ */
+$category_ids = $wpdb->get_col(
+    $wpdb->prepare(
+        "SELECT pm_cat_id 
+         FROM {$wpdb->prefix}peepso_page_categories 
+         WHERE pm_page_id = %d",
+        $page->id
+    )
+);
 
 $category_tabs = [
     'validators' => 'Validators',
@@ -126,9 +48,7 @@ $category_tab_map = [
 $tabs = [];
 
 foreach ($category_ids as $cat_id) {
-
     if (isset($category_tab_map[$cat_id])) {
-
         $key = $category_tab_map[$cat_id];
 
         if (!isset($tabs[$key])) {
@@ -137,25 +57,16 @@ foreach ($category_ids as $cat_id) {
     }
 }
 
-/* Default tab */
 if (empty($tabs)) {
     $tabs = ['overview' => 'Overview'];
 }
 
-/* Active tab */
-$active_tab = isset($_GET['tab'])
-    ? sanitize_key($_GET['tab'])
-    : key($tabs);
+$active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : key($tabs);
 
 if (!isset($tabs[$active_tab])) {
     $active_tab = key($tabs);
 }
-
-/* ============================================================
-   TABS UI
-============================================================ */
 ?>
-
 <div class="bcc-dashboard-tabs ps-focus__menu ps-js-focus__menu">
     <div class="bcc-dashboard-tabs-inner ps-focus__menu-inner ps-js-focus__menu-inner">
 
@@ -173,14 +84,9 @@ if (!isset($tabs[$active_tab])) {
     </div>
 </div>
 
-<!-- ============================================================
-     TAB CONTENT
-============================================================ -->
-
 <div class="bcc-dashboard-content">
 
 <?php
-
 
 $tab_files = [
     'overview'   => __DIR__ . '/dashboard/overview.php',
@@ -191,10 +97,6 @@ $tab_files = [
 ];
 
 if (isset($tab_files[$active_tab]) && file_exists($tab_files[$active_tab])) {
-
-    /* -----------------------------------------
-     * Resolve Domain Object ID - USE EXISTING FUNCTIONS
-     * ----------------------------------------- */
 
     switch ($active_tab) {
 
@@ -216,9 +118,6 @@ if (isset($tab_files[$active_tab]) && file_exists($tab_files[$active_tab])) {
     }
 
     include $tab_files[$active_tab];
-
-} else {
-    // ... rest of your code
 }
 
 ?>

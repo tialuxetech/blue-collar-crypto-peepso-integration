@@ -1,0 +1,695 @@
+/* ======================================================
+   BLUE COLLAR CRYPTO - PEEPSO INTEGRATION
+   Consolidated CSS - Structure Only (No Colors)
+   Version: 1.0.0
+====================================================== */
+
+/* Import your block theme styles */
+@import url("../peepso-block-theme/style.css");
+
+/* ======================================================
+   CARD STYLES (from cards.css)
+====================================================== */
+
+.ps-blogposts__post,
+.ps-blogposts__post-inside,
+.ps-blogposts__post-body {
+    height: auto;
+    overflow: visible;
+}
+
+.ps-blogposts__post-actions {
+    height: auto !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px;
+    margin-top: 12px;
+    padding-bottom: 12px;
+}
+
+.ps-blogposts__post-actions .ps-btn {
+    line-height: 1.4 !important;
+    padding: 8px 12px !important;
+}
+
+/* ======================================================
+   REPEATER SLIDER STYLES (from cards.css)
+====================================================== */
+
+.bcc-slider-wrap {
+  margin-top: 30px;
+}
+
+.bcc-slider {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+}
+
+.bcc-slider::-webkit-scrollbar {
+  height: 6px;
+}
+
+.bcc-slider::-webkit-scrollbar-track {
+  border-radius: 10px;
+}
+
+.bcc-slider::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+}
+
+.bcc-slide {
+  min-width: 260px;
+  border-radius: 10px;
+  padding: 16px;
+  scroll-snap-align: start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bcc-slide:hover {
+  transform: translateY(-2px);
+}
+
+.bcc-slide h4 {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.bcc-slide-stats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bcc-slide-stats li {
+  padding: 6px 0;
+  border-bottom: 1px solid;
+  font-size: 14px;
+}
+
+.bcc-slide-stats li:last-child {
+  border-bottom: none;
+}
+
+/* ======================================================
+   GALLERY CONTAINER
+====================================================== */
+
+.bcc-gallery-container {
+  border: 2px dashed;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+/* ======================================================
+   MAIN SLIDER
+====================================================== */
+
+.bcc-gallery-slider-wrapper {
+  max-width: 600px;
+  margin: 0 auto 15px;
+}
+
+.bcc-gallery-slider {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.bcc-slider-item {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bcc-slider-item.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bcc-slider-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ======================================================
+   SLIDER CONTROLS
+====================================================== */
+
+.bcc-slider-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.bcc-slider-prev,
+.bcc-slider-next {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.bcc-slider-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.bcc-slider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.bcc-slider-dot:hover {
+  transform: scale(1.2);
+}
+
+.bcc-slider-counter {
+  text-align: center;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+/* ======================================================
+   THUMB STRIP
+====================================================== */
+
+.bcc-gallery-thumb-slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.bcc-thumb-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: background 0.2s ease;
+}
+
+.bcc-gallery-thumbnails {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  flex: 1;
+  padding: 5px 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.bcc-gallery-thumbnails::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.bcc-gallery-thumb-wrapper {
+  min-width: 90px;
+  width: 90px;
+  height: 90px;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  cursor: grab;
+  transition: opacity 0.2s ease;
+}
+
+.bcc-gallery-thumb-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.bcc-gallery-thumb-wrapper.is-dragging {
+  opacity: 0.5;
+}
+
+.bcc-gallery-thumb-wrapper.bcc-gallery-thumb-hover {
+  opacity: 0.9;
+}
+
+/* ======================================================
+   THUMB CHECKBOX (BULK SELECT)
+====================================================== */
+
+.bcc-thumb-select {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  z-index: 50;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  margin: 0;
+}
+
+.bcc-gallery-thumb-wrapper:hover .bcc-thumb-select,
+.bcc-gallery-thumb-selecting .bcc-thumb-select {
+  opacity: 1;
+}
+
+.bcc-gallery-thumb-wrapper:has(.bcc-thumb-select:checked) {
+  outline: 3px solid;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ======================================================
+   THUMB DELETE BUTTON
+====================================================== */
+
+.bcc-gallery-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.bcc-gallery-thumb-wrapper:hover .bcc-gallery-remove {
+  opacity: 1;
+}
+
+/* ======================================================
+   ACTION BAR
+====================================================== */
+
+.bcc-gallery-actions-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.bcc-gallery-action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bcc-gallery-upload,
+.bcc-bulk-select,
+.bcc-bulk-delete {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.2s ease;
+}
+
+.bcc-gallery-count-wrapper {
+  font-size: 14px;
+}
+
+/* ======================================================
+   BULK SELECTION STATES
+====================================================== */
+
+.bcc-gallery-thumb-selecting .bcc-thumb-select {
+  opacity: 1;
+}
+
+.bcc-bulk-delete:disabled,
+.bcc-bulk-select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ======================================================
+   INLINE EDIT ROWS
+====================================================== */
+
+.bcc-row {
+  display: flex;
+  margin-bottom: 15px;
+  align-items: flex-start;
+}
+
+.bcc-row-label {
+  width: 200px;
+  font-weight: 600;
+  padding: 8px 0;
+}
+
+.bcc-row-value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+
+.bcc-inline-text,
+.bcc-inline-select {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease;
+  min-width: 200px;
+  word-break: break-word;
+}
+
+.bcc-inline-text.is-editing,
+.bcc-inline-select.is-editing {
+  cursor: default;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.bcc-inline-input {
+  padding: 8px 12px;
+  border: 1px solid;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.bcc-inline-input:focus {
+  outline: none;
+}
+
+textarea.bcc-inline-input {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.bcc-inline-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.bcc-inline-save,
+.bcc-inline-cancel {
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+}
+
+.bcc-inline-edit-btn {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  min-width: 40px;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+/* ======================================================
+   VISIBILITY POPOVER
+====================================================== */
+
+#bcc-visibility-popover {
+  position: fixed;
+  border-radius: 0.75rem;
+  padding: 0.25rem 0;
+  min-width: 11rem;
+  z-index: 999999;
+}
+
+#bcc-visibility-popover .bcc-vis-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+#bcc-visibility-popover .bcc-vis-option + .bcc-vis-option {
+  border-top: 1px solid;
+}
+
+#bcc-visibility-popover .bcc-vis-option span,
+#bcc-visibility-popover .bcc-vis-option i {
+  font-size: 1rem;
+  width: 1.1rem;
+  text-align: center;
+}
+
+#bcc-visibility-popover .bcc-vis-option.is-active {
+  opacity: 0.8;
+}
+
+/* ======================================================
+   VISIBILITY PILL
+====================================================== */
+
+.bcc-visibility-pill {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.bcc-visibility-pill:hover {
+  opacity: 0.8;
+}
+
+.bcc-visibility-pill.bcc-loading {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ======================================================
+   DIVIDER
+====================================================== */
+
+.bcc-divider {
+  border: none;
+  border-top: 1px solid;
+  margin: 30px 0;
+}
+
+/* ======================================================
+   TOAST NOTIFICATION
+====================================================== */
+
+.bcc-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  z-index: 999999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.bcc-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ======================================================
+   ANIMATIONS
+====================================================== */
+
+@keyframes dashicons-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(359deg); }
+}
+
+.dashicons.spinning {
+  animation: dashicons-spin 1s infinite linear;
+}
+
+/* ======================================================
+   LOADING STATES
+====================================================== */
+
+.bcc-loading {
+  opacity: 0.7;
+  cursor: wait !important;
+  position: relative;
+  pointer-events: none;
+}
+
+/* ======================================================
+   RESPONSIVE / MOBILE
+====================================================== */
+
+@media (max-width: 768px) {
+  .bcc-gallery-slider {
+    height: 200px;
+  }
+
+  .bcc-gallery-actions-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bcc-gallery-action-buttons {
+    justify-content: center;
+  }
+
+  .bcc-slide {
+    flex: 0 0 95%;
+    max-width: 95%;
+  }
+
+  .bcc-row {
+    flex-direction: column;
+  }
+
+  .bcc-row-label {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  .bcc-row-value {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .bcc-gallery-thumb-wrapper {
+    min-width: 70px;
+    width: 70px;
+    height: 70px;
+  }
+}
+/* ======================================================
+   THUMB STRIP - Updated with proper cursor styles
+====================================================== */
+
+.bcc-gallery-thumb-wrapper {
+  min-width: 90px;
+  width: 90px;
+  height: 90px;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  cursor: grab;
+  transition: opacity 0.2s ease;
+  user-select: none; /* Prevent text selection while dragging */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.bcc-gallery-thumb-wrapper:active {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.bcc-gallery-thumb-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  pointer-events: none; /* Prevent image from interfering with drag events */
+  -webkit-user-drag: none; /* Disable native drag on images */
+  user-drag: none;
+}
+
+.bcc-gallery-thumb-wrapper.is-dragging {
+  opacity: 0.5;
+  cursor: grabbing !important;
+}
+
+/* ======================================================
+   THUMB DELETE BUTTON - Fixed positioning and z-index
+====================================================== */
+
+.bcc-gallery-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+  z-index: 100; /* Ensure it's above the image */
+  border: none;
+  background: rgba(0,0,0,0.7); /* Temporary background so you can see it */
+  color: white; /* Temporary color */
+}
+
+.bcc-gallery-remove:hover {
+  transform: scale(1.1);
+  background: rgba(220,53,69,0.9); /* Red on hover */
+}
+
+.bcc-gallery-thumb-wrapper:hover .bcc-gallery-remove {
+  opacity: 1;
+}
+
+/* Ensure delete button is clickable */
+.bcc-gallery-remove {
+  pointer-events: auto !important;
+}

@@ -3,19 +3,24 @@ if (!defined('ABSPATH')) exit;
 
 /**
  * ======================================================
- *  Gallery Upload + Delete + List + Reorder AJAX
+ *  Gallery AJAX Handler
+ *  Combines gallery meta and main gallery functionality
  * ======================================================
  */
-
 class BCC_Ajax_Gallery {
 
     public static function register(): void {
+        // Upload & Delete
         add_action('wp_ajax_bcc_upload_gallery_images', [__CLASS__, 'upload']);
         add_action('wp_ajax_bcc_delete_gallery_image', [__CLASS__, 'delete']);
-
-        // MISSING BEFORE — required for lazy-load + drag reorder
+        
+        // List & Reorder
         add_action('wp_ajax_bcc_gallery_list_images', [__CLASS__, 'list_images']);
         add_action('wp_ajax_bcc_gallery_reorder_images', [__CLASS__, 'reorder_images']);
+        
+        // Repeater row operations
+        add_action('wp_ajax_bcc_delete_repeater_row', [__CLASS__, 'delete_repeater_row']);
+        add_action('wp_ajax_bcc_repeater_reorder_rows', [__CLASS__, 'reorder_repeater_rows']);
     }
 
     /* ======================================================
@@ -36,8 +41,19 @@ class BCC_Ajax_Gallery {
         return $collection;
     }
 
+    private static function can_view_or_fail(int $post_id): void {
+        if (function_exists('bcc_user_can_view_post') && !bcc_user_can_view_post($post_id)) {
+            wp_send_json_error(['message' => 'Not allowed']);
+        }
+    }
+
     private static function can_edit_or_fail(int $post_id): void {
-        if (!current_user_can('edit_post', $post_id)) {
+        // Check using custom function first, fallback to standard capability
+        if (function_exists('bcc_user_can_edit_post')) {
+            if (!bcc_user_can_edit_post($post_id)) {
+                wp_send_json_error(['message' => 'Permission denied']);
+            }
+        } elseif (!current_user_can('edit_post', $post_id)) {
             wp_send_json_error(['message' => 'Permission denied']);
         }
     }
@@ -157,37 +173,43 @@ class BCC_Ajax_Gallery {
     /* ======================================================
        DELETE
     ====================================================== */
-
+    
     public static function delete(): void {
-
+        
+        error_log('BCC Delete called');
+        error_log('POST data: ' . print_r($_POST, true));
+        
         check_ajax_referer('bcc_nonce', 'nonce');
-
+        
         $image_id = absint($_POST['image_id'] ?? 0);
         $post_id  = absint($_POST['post_id'] ?? 0);
-        $row      = absint($_POST['row'] ?? 0);
-
+        $row      = absint($_POST['row'] ?? 0);  // This is the repeater row/collection
+        
+        error_log("BCC Delete - image_id: $image_id, post_id: $post_id, row: $row");
+        
         if (!$image_id || !$post_id) {
             wp_send_json_error(['message' => 'Missing data']);
         }
-
+        
         self::can_edit_or_fail($post_id);
-
+        
+        // Get the collection for this specific repeater row
         $collection = self::get_collection_or_fail($post_id, $row);
-
+        
         $image = BCC_Gallery_Repository::delete_image($image_id);
         if (!$image) {
             wp_send_json_error(['message' => 'Image not found']);
         }
-
+        
         // Physical files
         $upload_dir = wp_upload_dir();
         $base_dir = trailingslashit($upload_dir['basedir']) . 'bcc-gallery/';
-
+        
         @unlink($base_dir . $image->file);
         @unlink($base_dir . 'thumb-' . $image->file);
-
+        
         $total = BCC_Gallery_Repository::count_images((int) $collection->id);
-
+        
         wp_send_json_success([
             'message' => 'Deleted',
             'total'   => (int) $total
@@ -195,7 +217,7 @@ class BCC_Ajax_Gallery {
     }
 
     /* ======================================================
-       LIST (PAGED) — REQUIRED FOR LAZY LOAD
+       LIST (PAGED) — FROM BOTH CLASSES
     ====================================================== */
 
     public static function list_images(): void {
@@ -208,12 +230,17 @@ class BCC_Ajax_Gallery {
         $per_page  = absint($_POST['per_page'] ?? 12);
 
         if (!$post_id) {
-            wp_send_json_error(['message' => 'Missing post_id']);
+            wp_send_json_error(['message' => 'Invalid post']);
         }
 
-        self::can_edit_or_fail($post_id);
+        // View permission check
+        self::can_view_or_fail($post_id);
 
         $collection = self::get_collection_or_fail($post_id, $row);
+
+        if (!$collection) {
+            wp_send_json_success(['items' => [], 'total' => 0, 'page' => $page]);
+        }
 
         $page = max(1, $page);
         $per_page = max(1, min(50, $per_page));
@@ -231,13 +258,14 @@ class BCC_Ajax_Gallery {
 
         wp_send_json_success([
             'items' => $items,
-            'page'  => $page,
-            'total' => (int) ($result['total'] ?? 0)
+            'total' => (int) ($result['total'] ?? 0),
+            'page'  => (int) $page,
+            'per_page' => (int) $per_page,
         ]);
     }
 
     /* ======================================================
-       REORDER — REQUIRED FOR DRAG & DROP SAVE
+       REORDER — FROM BOTH CLASSES
     ====================================================== */
 
     public static function reorder_images(): void {
@@ -259,14 +287,124 @@ class BCC_Ajax_Gallery {
         $ok = BCC_Gallery_Repository::update_sort_orders((int) $collection->id, $order);
 
         if (!$ok) {
-            wp_send_json_error(['message' => 'Reorder failed']);
+            wp_send_json_error(['message' => 'Invalid order']);
         }
 
         wp_send_json_success(['message' => 'Reordered']);
     }
 
     /* ======================================================
-       THUMBNAIL
+       DELETE REPEATER ROW
+    ====================================================== */
+
+    public static function delete_repeater_row(): void {
+        check_ajax_referer('bcc_nonce', 'nonce');
+        
+        $post_id = absint($_POST['post_id'] ?? 0);
+        $field = sanitize_text_field($_POST['field'] ?? '');
+        $row = absint($_POST['row'] ?? 0);
+        
+        error_log('BCC Delete Repeater Row - post_id: ' . $post_id . ', field: ' . $field . ', row: ' . $row);
+        
+        if (!$post_id || !$field) {
+            wp_send_json_error(['message' => 'Missing data']);
+        }
+        
+        // Check permissions
+        if (function_exists('bcc_user_can_edit_post')) {
+            if (!bcc_user_can_edit_post($post_id)) {
+                wp_send_json_error(['message' => 'Permission denied']);
+            }
+        } elseif (!current_user_can('edit_post', $post_id)) {
+            wp_send_json_error(['message' => 'Permission denied']);
+        }
+        
+        // Get the repeater field value
+        $rows = get_field($field, $post_id);
+        
+        if (!is_array($rows)) {
+            wp_send_json_error(['message' => 'No rows found']);
+        }
+        
+        // Remove the specified row
+        if (isset($rows[$row])) {
+            // Optional: Delete any associated gallery images here
+            // You might want to add gallery cleanup logic here
+            
+            array_splice($rows, $row, 1);
+            $updated = update_field($field, $rows, $post_id);
+            
+            if ($updated) {
+                wp_send_json_success([
+                    'message' => 'Row deleted',
+                    'rows' => count($rows)
+                ]);
+            } else {
+                wp_send_json_error(['message' => 'Failed to update field']);
+            }
+        } else {
+            wp_send_json_error(['message' => 'Row not found at index ' . $row]);
+        }
+    }
+
+    /* ======================================================
+       REORDER REPEATER ROWS
+    ====================================================== */
+
+    public static function reorder_repeater_rows(): void {
+        check_ajax_referer('bcc_nonce', 'nonce');
+        
+        $post_id = absint($_POST['post_id'] ?? 0);
+        $field = sanitize_text_field($_POST['field'] ?? '');
+        $order = $_POST['order'] ?? [];
+        
+        error_log('BCC Reorder Repeater Rows - post_id: ' . $post_id . ', field: ' . $field);
+        error_log('Order: ' . print_r($order, true));
+        
+        if (!$post_id || !$field || !is_array($order)) {
+            wp_send_json_error(['message' => 'Missing data']);
+        }
+        
+        // Check permissions
+        if (function_exists('bcc_user_can_edit_post')) {
+            if (!bcc_user_can_edit_post($post_id)) {
+                wp_send_json_error(['message' => 'Permission denied']);
+            }
+        } elseif (!current_user_can('edit_post', $post_id)) {
+            wp_send_json_error(['message' => 'Permission denied']);
+        }
+        
+        // Get current rows
+        $rows = get_field($field, $post_id);
+        
+        if (!is_array($rows)) {
+            wp_send_json_error(['message' => 'No rows found']);
+        }
+        
+        // Reorder rows based on the order array
+        $reordered_rows = [];
+        foreach ($order as $old_index) {
+            if (isset($rows[$old_index])) {
+                $reordered_rows[] = $rows[$old_index];
+            }
+        }
+        
+        // If we have the same number of rows, update
+        if (count($reordered_rows) === count($rows)) {
+            $updated = update_field($field, $reordered_rows, $post_id);
+            
+            if ($updated) {
+                wp_send_json_success(['message' => 'Rows reordered']);
+            } else {
+                wp_send_json_error(['message' => 'Failed to update field']);
+            }
+        } else {
+            wp_send_json_error(['message' => 'Invalid order data']);
+        }
+    }
+
+    /* ======================================================
+       THUMBNAIL CREATION
     ====================================================== */
 
     private static function create_thumbnail(string $src, string $dest): void {
@@ -305,5 +443,5 @@ class BCC_Ajax_Gallery {
     }
 }
 
+// Register all AJAX handlers
 BCC_Ajax_Gallery::register();
-
