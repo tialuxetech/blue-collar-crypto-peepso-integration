@@ -12,7 +12,6 @@ if (!$user_id) {
     return;
 }
 
-
 $plugin_header_file = plugin_dir_path(__FILE__) . '../../includes/partials/page-header.php';
 
 if (file_exists($plugin_header_file)) {

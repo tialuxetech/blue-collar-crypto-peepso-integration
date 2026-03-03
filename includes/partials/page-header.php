@@ -5,8 +5,6 @@ $PeepSoPage = $page;
 $coverUrl = $PeepSoPage->get_cover_url();
 $has_cover = false;
 
-
-
 if (FALSE !== stripos($coverUrl, 'peepso/pages/'))
 	$has_cover = true;
 
@@ -120,6 +118,8 @@ $page_categories_html = array();
 				</div>
 			</div>
 
+
+			
 			<div class="ps-focus__desc ps-js-focus-description">
 				<!-- Description -->
 				<?php
@@ -164,6 +164,10 @@ $page_categories_html = array();
 				</button>
 			</div>
 		</div>
+		
+		<div class="bcc-trust-widget">
+    <?php echo do_shortcode('[bcc_trust page_id="' . $page->id . '"]'); ?>
+</div>
 
 		<div class="ps-focus__menu ps-js-focus__menu">
 			<div class="ps-focus__menu-inner ps-js-focus__menu-inner">
@@ -248,8 +252,10 @@ $page_categories_html = array();
 		</div>
 	</div>
 </div>
+
+
 <script>
-	jQuery(function() {
-		peepsopagesdata.page_id = +'<?php echo $page->id ?>';
-	});
+jQuery(function() {
+	peepsopagesdata.page_id = +'<?php echo $page->id ?>';
+});
 </script>
